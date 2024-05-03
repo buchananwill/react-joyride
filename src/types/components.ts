@@ -239,7 +239,8 @@ export type Step = Simplify<
     /**
      * Options to be passed to react-floater
      */
-    floaterProps?: FloaterProps;
+    floaterProps?: Omit<FloaterProps, 'component' | 'content'> &
+      Partial<Pick<FloaterProps, 'component' | 'content'>>;
     /**
      * Hide the tooltip's footer.
      * @default false

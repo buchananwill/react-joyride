@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Floater, { Props as FloaterProps, RenderProps } from 'react-floater';
+import Floater, { CustomComponentProps, Props as FloaterProps } from 'react-floater';
 import is from 'is-lite';
 import treeChanges from 'tree-changes';
 
@@ -199,7 +199,7 @@ export default class JoyrideStep extends React.Component<StepProps> {
     return hideBeacon(step) || lifecycle === LIFECYCLE.TOOLTIP;
   }
 
-  renderTooltip = (renderProps: RenderProps) => {
+  renderTooltip = (renderProps: CustomComponentProps) => {
     const { continuous, helpers, index, size, step } = this.props;
 
     return (
@@ -224,10 +224,12 @@ export default class JoyrideStep extends React.Component<StepProps> {
       return null;
     }
 
+    const { component, content, ...otherProps } = step.floaterProps || {};
+
     return (
       <div key={`JoyrideStep-${index}`} className="react-joyride__step">
         <Floater
-          {...step.floaterProps}
+          {...otherProps}
           component={this.renderTooltip}
           debug={debug}
           getPopper={this.setPopper}

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ReactNode } from 'react';
+import { PopperInstance } from 'react-floater';
 import isEqual from '@gilbarbara/deep-equal';
 import is from 'is-lite';
 import treeChanges from 'tree-changes';
@@ -295,20 +296,25 @@ class Joyride extends React.Component<Props, State> {
         debug,
       });
 
-      const beaconPopper = this.store.getPopper('beacon');
-      const tooltipPopper = this.store.getPopper('tooltip');
+      const beaconPopper: PopperInstance | null = this.store.getPopper('beacon');
+      const tooltipPopper: PopperInstance | null = this.store.getPopper('tooltip');
 
       if (lifecycle === LIFECYCLE.BEACON && beaconPopper) {
-        const { offsets, placement } = beaconPopper;
+        const { placement } = beaconPopper.state;
+
+        const { offset } = beaconPopper.state.modifiersData;
 
         if (!['bottom'].includes(placement) && !hasCustomScroll) {
-          scrollY = Math.floor(offsets.popper.top - scrollOffset);
+          scrollY = Math.floor((offset?.top?.y || 0) - scrollOffset);
         }
       } else if (lifecycle === LIFECYCLE.TOOLTIP && tooltipPopper) {
-        const { flipped, offsets, placement } = tooltipPopper;
+        const {
+          modifiersData: { offset },
+          placement,
+        } = tooltipPopper.state;
 
-        if (['top', 'right', 'left'].includes(placement) && !flipped && !hasCustomScroll) {
-          scrollY = Math.floor(offsets.popper.top - scrollOffset);
+        if (['top', 'right', 'left'].includes(placement) && !hasCustomScroll) {
+          scrollY = Math.floor((offset?.top?.y || 0) - scrollOffset);
         } else {
           scrollY -= step.spotlightPadding;
         }
@@ -320,7 +326,7 @@ class Joyride extends React.Component<Props, State> {
         scrollTo(scrollY, { element: scrollParent as Element, duration: scrollDuration }).then(
           () => {
             setTimeout(() => {
-              this.store.getPopper('tooltip')?.instance.update();
+              this.store.getPopper('tooltip')?.update();
             }, 10);
           },
         );
