@@ -1,9 +1,10 @@
 import { useReducer } from 'react';
 
+import { CallBackProps, Props, Step } from '~/types';
+
 import { standardSteps } from './steps';
 
 import Joyride, { LIFECYCLE, STATUS, Status } from '../../src';
-import { CallBackProps, Props, Step } from '../../src/types';
 
 interface CustomOptionsProps extends Omit<Props, 'run' | 'steps'> {
   finishedCallback: () => void;

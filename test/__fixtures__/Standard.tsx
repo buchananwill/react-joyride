@@ -1,9 +1,10 @@
 import { useReducer, useRef } from 'react';
 
+import { CallBackProps, Props, Status, Step } from '~/types';
+
 import { standardSteps } from './steps';
 
 import Joyride, { STATUS, StoreHelpers } from '../../src';
-import { CallBackProps, Props, Status, Step } from '../../src/types';
 
 interface State {
   index: number;

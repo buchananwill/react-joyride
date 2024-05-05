@@ -125,6 +125,7 @@ class Joyride extends React.Component<Props, State> {
       }
 
       if (!([STATUS.FINISHED, STATUS.SKIPPED] as Array<Status>).includes(status)) {
+        console.log('updating to init.', this.props, this.state)
         update({
           action: action === ACTIONS.CLOSE ? ACTIONS.CLOSE : nextAction,
           index: stepIndex,
@@ -135,6 +136,7 @@ class Joyride extends React.Component<Props, State> {
 
     // Update the index if the first step is not found
     if (!controlled && status === STATUS.RUNNING && index === 0 && !target) {
+    console.log('Update the index if the first step is not found')
       this.store.update({ index: index + 1 });
       this.callback({
         ...this.state,
@@ -202,8 +204,11 @@ class Joyride extends React.Component<Props, State> {
 
     this.scrollToStep(previousState);
 
-    if (step.placement === 'center' && status === STATUS.RUNNING && lifecycle === LIFECYCLE.INIT) {
-      this.store.update({ lifecycle: LIFECYCLE.READY });
+    if (
+      // step.placement === 'center' &&
+      status === STATUS.RUNNING && lifecycle === LIFECYCLE.INIT) {
+      console.log('updating from init to ready', this.props, this.state)
+      this.store.update({ lifecycle: LIFECYCLE.READY, action });
     }
   }
 
@@ -220,7 +225,7 @@ class Joyride extends React.Component<Props, State> {
    */
   callback = (data: CallBackProps) => {
     const { callback } = this.props;
-
+    console.log('callback:', data)
     if (is.function(callback)) {
       callback(data);
     }

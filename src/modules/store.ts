@@ -301,6 +301,8 @@ class Store {
   };
 
   public update = (state: Partial<State>) => {
+    console.log('Update called with: ', state)
+
     if (!hasValidKeys(state, validKeys)) {
       throw new Error(`State is not valid. Valid keys: ${validKeys.join(', ')}`);
     }
