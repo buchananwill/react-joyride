@@ -209,7 +209,7 @@ export type Props = Simplify<
 export type State = {
   action: Actions;
   controlled: boolean;
-  index: number;
+  index: number; // Todo: rename this to stepIndex to make its meaning clearer?
   lifecycle: Lifecycle;
   origin: Origin | null;
   size: number;

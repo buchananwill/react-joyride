@@ -117,26 +117,31 @@ class Joyride extends React.Component<Props, State> {
     }
 
     if (stepIndexChanged) {
+
+      // Todo: This logic is split.
+      //  Would be clearer to set nextAction a single time with more explicit handling of possible conditions.
       let nextAction: Actions =
-        is.number(previousStepIndex) && previousStepIndex < stepIndex ? ACTIONS.NEXT : ACTIONS.PREV;
+        is.number(previousStepIndex) // What if the previousStepIndex is not a number?
+        && previousStepIndex < stepIndex ? ACTIONS.NEXT : ACTIONS.PREV;
 
       if (action === ACTIONS.STOP) {
         nextAction = ACTIONS.START;
       }
 
       if (!([STATUS.FINISHED, STATUS.SKIPPED] as Array<Status>).includes(status)) {
-        console.log('updating to init.', this.props, this.state)
-        update({
+        const proposedUpdate: Partial<State> = {
           action: action === ACTIONS.CLOSE ? ACTIONS.CLOSE : nextAction,
-          index: stepIndex,
+            index: stepIndex,
           lifecycle: LIFECYCLE.INIT,
-        });
+          status: run ? STATUS.RUNNING : STATUS.PAUSED // Prediction: asynchronous state updates are causing the step to bounce on from init to ready, before the stop() process completes. THIS DID NOT WORK
+        }
+        console.log(proposedUpdate)
+        update(proposedUpdate);
       }
     }
 
     // Update the index if the first step is not found
     if (!controlled && status === STATUS.RUNNING && index === 0 && !target) {
-    console.log('Update the index if the first step is not found')
       this.store.update({ index: index + 1 });
       this.callback({
         ...this.state,
@@ -145,9 +150,10 @@ class Joyride extends React.Component<Props, State> {
       });
     }
 
+    // 'index' is part of the this.state already: should be stepIndex, to pass the changed step?
     const callbackData = {
       ...this.state,
-      index,
+      index: stepIndex ?? index,
       step,
     };
     const isAfterAction = changed('action', [
@@ -204,10 +210,13 @@ class Joyride extends React.Component<Props, State> {
 
     this.scrollToStep(previousState);
 
+    // TODO: This needs to automatically push to ready for the first step, but not when step:after
     if (
-      // step.placement === 'center' &&
-      status === STATUS.RUNNING && lifecycle === LIFECYCLE.INIT) {
-      console.log('updating from init to ready', this.props, this.state)
+      (step.placement === 'center' &&
+      status === STATUS.RUNNING && lifecycle === LIFECYCLE.INIT)
+      || (!isAfterAction &&
+      status === STATUS.RUNNING && lifecycle === LIFECYCLE.INIT)
+    ) {
       this.store.update({ lifecycle: LIFECYCLE.READY, action });
     }
   }
@@ -225,7 +234,6 @@ class Joyride extends React.Component<Props, State> {
    */
   callback = (data: CallBackProps) => {
     const { callback } = this.props;
-    console.log('callback:', data)
     if (is.function(callback)) {
       callback(data);
     }

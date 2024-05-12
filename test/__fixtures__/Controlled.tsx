@@ -129,6 +129,9 @@ export default function Controlled(props: ControlledProps) {
     }, 1000);
   }, []);
 
+  /**
+   * Instance callback created to handle uniquely the lifecycle of this Controlled tour.
+   * */
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { action, index, status, type } = data;
 

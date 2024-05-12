@@ -1,16 +1,16 @@
 import * as React from 'react';
-import Floater, { CustomComponentProps, Props as FloaterProps } from 'react-floater';
+import Floater, {CustomComponentProps, Props as FloaterProps} from 'react-floater';
 import is from 'is-lite';
 import treeChanges from 'tree-changes';
 
-import { getElement, isElementVisible } from '~/modules/dom';
-import { hideBeacon, log } from '~/modules/helpers';
+import {getElement, isElementVisible} from '~/modules/dom';
+import {hideBeacon, log} from '~/modules/helpers';
 import Scope from '~/modules/scope';
-import { validateStep } from '~/modules/step';
+import {validateStep} from '~/modules/step';
 
-import { ACTIONS, EVENTS, LIFECYCLE, STATUS } from '~/literals';
+import {ACTIONS, EVENTS, LIFECYCLE, STATUS} from '~/literals';
 
-import { StepProps } from '~/types';
+import {Status, StepProps} from '~/types';
 
 import Beacon from './Beacon';
 import Tooltip from './Tooltip/index';
@@ -69,14 +69,15 @@ export default class JoyrideStep extends React.Component<StepProps> {
       });
     }
 
+    // Prediction: commenting this entire conditional will block the controlled tour. TRUE
     if (
-      // step.placement === 'center' &&
+      step.placement === 'center' && // prediction: uncommenting prevents the auto-ready needed to start the controlled tour FALSE
       status === STATUS.RUNNING &&
+      lifecycle === LIFECYCLE.INIT &&
       changed('index') &&
-      action !== ACTIONS.START &&
-      lifecycle === LIFECYCLE.INIT
+      action !== ACTIONS.START
+      // !controlled // prediction: adding this will block the controlled tour TRUE
     ) {
-      console.log('calling store.update', action, this.props, previousProps)
       store.update({ lifecycle: LIFECYCLE.READY, action: action });
     }
 
@@ -106,14 +107,12 @@ export default class JoyrideStep extends React.Component<StepProps> {
         });
 
         if (!controlled) {
-          console.log('updating index:', index, action)
           store.update({ index: index + (action === ACTIONS.PREV ? -1 : 1), action });
         }
       }
     }
 
     if (changedFrom('lifecycle', LIFECYCLE.INIT, LIFECYCLE.READY)) {
-      console.log('updating to either tooltip or beacon.', state)
       store.update({
         lifecycle: hideBeacon(step) || skipBeacon ? LIFECYCLE.TOOLTIP : LIFECYCLE.BEACON,
       });
@@ -177,20 +176,19 @@ export default class JoyrideStep extends React.Component<StepProps> {
 
   setPopper: FloaterProps['getPopper'] = (popper, type) => {
     const { action, lifecycle, step, store } = this.props;
-    console.log('set Popper called with:', this.props)
     if (type === 'wrapper') {
       store.setPopper('beacon', popper);
     } else {
       store.setPopper('tooltip', popper);
     }
 
-    if (store.getPopper('beacon') && store.getPopper('tooltip') && lifecycle === LIFECYCLE.INIT) {
-      console.log('updating to ready, within the set popper', this.state, this.props)
-      store.update({
-        action,
-        lifecycle: LIFECYCLE.READY,
-      });
-    }
+    // Prediction: commenting this condition while block the controlled tour. FALSE.
+    // if (store.getPopper('beacon') && store.getPopper('tooltip') && lifecycle === LIFECYCLE.INIT) {
+    //   store.update({
+    //     action,
+    //     lifecycle: LIFECYCLE.READY,
+    //   });
+    // }
 
     if (step.floaterProps?.getPopper) {
       step.floaterProps.getPopper(popper, type);
@@ -199,10 +197,9 @@ export default class JoyrideStep extends React.Component<StepProps> {
 
   get open() {
     const { lifecycle, step } = this.props;
-    console.log('reasons for being open:')
-    console.log(hideBeacon(step))
-    console.log(lifecycle)
-    return hideBeacon(step) || lifecycle === LIFECYCLE.TOOLTIP;
+    return (hideBeacon(step) || lifecycle === LIFECYCLE.TOOLTIP)
+      && ([STATUS.RUNNING, STATUS.READY] as Array<Status>).includes(this.props.status)
+      && lifecycle !== LIFECYCLE.INIT
   }
 
 
@@ -225,8 +222,6 @@ export default class JoyrideStep extends React.Component<StepProps> {
   };
 
   render() {
-    console.log(this.open) // watching the open state
-
     const { continuous, debug, index, nonce, shouldScroll, size, step } = this.props;
     const target = getElement(step.target);
 

@@ -218,7 +218,12 @@ class Store {
       return;
     }
 
-    this.setState(this.getNextState({ action: ACTIONS.NEXT, index: index + 1 }));
+    // Prediction: telling the lifecycle to pass to complete when hitting next, will prevent it bouncing on to the next index.
+    let nextState = this.getNextState({ action: ACTIONS.NEXT, index: index + 1, lifecycle: LIFECYCLE.COMPLETE });
+    console.log('previous state:', {...this.getState()})
+    console.log('proposed state:', {...nextState})
+
+    this.setState(this.getNextState(nextState));
   };
 
   public open = () => {
@@ -301,7 +306,6 @@ class Store {
   };
 
   public update = (state: Partial<State>) => {
-    console.log('Update called with: ', state)
 
     if (!hasValidKeys(state, validKeys)) {
       throw new Error(`State is not valid. Valid keys: ${validKeys.join(', ')}`);

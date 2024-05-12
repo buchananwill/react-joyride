@@ -109,6 +109,7 @@ export default class JoyrideTooltip extends React.Component<TooltipProps> {
         setTooltipRef,
       };
 
+
       const TooltipComponent = tooltipComponent;
 
       component = <TooltipComponent {...renderProps} />;
