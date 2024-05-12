@@ -95,7 +95,7 @@
     "lint": "eslint --fix src test",
     "typecheck": "tsc -p test/tsconfig.json",
     "typevalidation": "attw -P",
-    "test": "echo 'Skipping tests'",
+    "test": "is-ci \"test:coverage\" \"test:watch\"",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest watch",
     "e2e": "playwright test -c playwright-ct.config.ts",

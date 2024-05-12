@@ -135,7 +135,6 @@ class Joyride extends React.Component<Props, State> {
           lifecycle: LIFECYCLE.INIT,
           status: run ? STATUS.RUNNING : STATUS.PAUSED // Prediction: asynchronous state updates are causing the step to bounce on from init to ready, before the stop() process completes. THIS DID NOT WORK
         }
-        console.log(proposedUpdate)
         update(proposedUpdate);
       }
     }
@@ -217,7 +216,9 @@ class Joyride extends React.Component<Props, State> {
       || (!isAfterAction &&
       status === STATUS.RUNNING && lifecycle === LIFECYCLE.INIT)
     ) {
-      this.store.update({ lifecycle: LIFECYCLE.READY, action });
+      this.store.update({ lifecycle: LIFECYCLE.READY, action }); // Old version: retain the action state
+      // this.store.update({ lifecycle: LIFECYCLE.READY, action: ACTIONS.UPDATE }); // Prediction: this will PASS the last test, but may FAIL others! May need to distinguish edge cases. FALSE and TRUE.
+      // this.store.update({ lifecycle: LIFECYCLE.READY, action: action === ACTIONS.NEXT ? ACTIONS.UPDATE : action }); // Prediction: this will PASS the last test. TRUE. However it fails the test for rendering the Step 2 Tooltip.
     }
   }
 
