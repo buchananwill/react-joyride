@@ -76,11 +76,11 @@ export default class JoyrideStep extends React.Component<StepProps> {
       lifecycle === LIFECYCLE.INIT &&
       changed('index') &&
       action !== ACTIONS.START
-      // !controlled // prediction: adding this will block the controlled tour TRUE
+      // && !controlled // prediction: adding this will block the controlled tour TRUE
     ) {
       store.update({
         lifecycle: LIFECYCLE.READY,
-        action: ACTIONS.UPDATE  // I added this action persistence, to try to pass the controlled/custom tours. Prediction: setting manually to UPDATE will satisfy the Step 6 Standard test
+        action: ACTIONS.UPDATE  // I added this action persistence, to try to pass the controlled/custom tours. Prediction: setting manually to UPDATE will satisfy the Step 6 Standard test FALSE.
       });
     }
 
@@ -178,7 +178,7 @@ export default class JoyrideStep extends React.Component<StepProps> {
   };
 
   setPopper: FloaterProps['getPopper'] = (popper, type) => {
-    const { action, lifecycle, step, store } = this.props;
+    const {step, store } = this.props;
     if (type === 'wrapper') {
       store.setPopper('beacon', popper);
     } else {
