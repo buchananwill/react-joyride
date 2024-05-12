@@ -21,8 +21,8 @@ importers:
         specifier: ^1.2.1
         version: 1.2.1
       react-floater:
-        specifier: file:D:\Coding\react-floater
-        version: file:../react-floater(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 0.9.3
+        version: 0.9.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-innertext:
         specifier: ^1.1.5
         version: 1.1.5(@types/react@18.2.74)(react@18.2.0)
@@ -2283,8 +2283,8 @@ packages:
     peerDependencies:
       react: ^18.2.0
 
-  react-floater@file:../react-floater:
-    resolution: {directory: ../react-floater, type: directory}
+  react-floater@0.9.3:
+    resolution: {integrity: sha512-nyblYb8WXAjnP64Rf6AiwcTL6YpfmPuAVkrMTUKoU7S2jVYv+HRIfJN3Amty7QIERNBmbUZtP9PVKajalwGzcw==}
     peerDependencies:
       react: 16.8 - 18
       react-dom: 16.8 - 18
@@ -5210,7 +5210,7 @@ snapshots:
       react: 18.2.0
       scheduler: 0.23.0
 
-  react-floater@file:../react-floater(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  react-floater@0.9.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@popperjs/core': 2.11.8
       deepmerge-ts: 5.1.0

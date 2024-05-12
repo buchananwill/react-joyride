@@ -222,8 +222,6 @@ class Store {
     // But it also stops it proceeding automatically in an uncontrolled tour.
     const lifecycle: Lifecycle | undefined = controlled ? LIFECYCLE.COMPLETE : undefined // Prediction: only setting this property during controlled tours allows the others to proceed normally. TRUE
     let nextState = this.getNextState({ action: ACTIONS.NEXT, index: index + 1, lifecycle });
-    console.log('previous state:', {...this.getState()})
-    console.log('proposed state:', {...nextState})
 
     this.setState(this.getNextState(nextState));
   };
