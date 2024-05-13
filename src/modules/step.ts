@@ -47,7 +47,7 @@ export function getMergedStep(props: Props, currentStep?: Step): StepMerged {
     defaultFloaterProps,
     props.floaterProps ?? {},
     mergedStep.floaterProps ?? {},
-  ]) as SetRequired<FloaterProps, 'options' | 'wrapperOptions'>;
+  ]) as SetRequired<FloaterProps, 'modifiers' | 'wrapperOptions'>;
 
   // Set react-floater props
   floaterProps.offset = mergedStep.offset;
@@ -59,15 +59,19 @@ export function getMergedStep(props: Props, currentStep?: Step): StepMerged {
     floaterProps.wrapperOptions.placement = mergedStep.placementBeacon;
   }
 
-  if (scrollParent && floaterProps.options.preventOverflow) {
-    floaterProps.options.preventOverflow.boundariesElement = 'window';
+  if (scrollParent && floaterProps.modifiers.preventOverflow) {
+    floaterProps.modifiers.preventOverflow.options = {
+      ...floaterProps.modifiers.preventOverflow.options, // Spread existing options (if any)
+      rootBoundary: 'viewport', // Set or overwrite rootBoundary
+      boundary: 'clippingParents', // Set or overwrite boundary
+    };
   }
 
   return {
     ...mergedStep,
     locale: deepmerge.all([defaultLocale, props.locale ?? {}, mergedStep.locale || {}]),
     floaterProps,
-    styles: omit(mergedStyles, 'floaterStyles'),
+    styles: omit(mergedStyles, 'floaterStyles'), // Todo: Why omit floater styles?
   };
 }
 

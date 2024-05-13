@@ -209,7 +209,7 @@ export type Props = Simplify<
 export type State = {
   action: Actions;
   controlled: boolean;
-  index: number;
+  index: number; // Todo: rename this to stepIndex to make its meaning clearer?
   lifecycle: Lifecycle;
   origin: Origin | null;
   size: number;
@@ -239,7 +239,8 @@ export type Step = Simplify<
     /**
      * Options to be passed to react-floater
      */
-    floaterProps?: FloaterProps;
+    floaterProps?: Omit<FloaterProps, 'component' | 'content'> &
+      Partial<Pick<FloaterProps, 'component' | 'content'>>;
     /**
      * Hide the tooltip's footer.
      * @default false

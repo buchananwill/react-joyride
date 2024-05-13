@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ReactNode } from 'react';
+import { PopperInstance } from 'react-floater';
 import isEqual from '@gilbarbara/deep-equal';
 import is from 'is-lite';
 import treeChanges from 'tree-changes';
@@ -116,19 +117,25 @@ class Joyride extends React.Component<Props, State> {
     }
 
     if (stepIndexChanged) {
+
+      // Todo: This logic is split.
+      //  Would be clearer to set nextAction a single time with more explicit handling of possible conditions.
       let nextAction: Actions =
-        is.number(previousStepIndex) && previousStepIndex < stepIndex ? ACTIONS.NEXT : ACTIONS.PREV;
+        is.number(previousStepIndex) // What if the previousStepIndex is not a number?
+        && previousStepIndex < stepIndex ? ACTIONS.NEXT : ACTIONS.PREV;
 
       if (action === ACTIONS.STOP) {
         nextAction = ACTIONS.START;
       }
 
       if (!([STATUS.FINISHED, STATUS.SKIPPED] as Array<Status>).includes(status)) {
-        update({
+        const proposedUpdate: Partial<State> = {
           action: action === ACTIONS.CLOSE ? ACTIONS.CLOSE : nextAction,
-          index: stepIndex,
+            index: stepIndex,
           lifecycle: LIFECYCLE.INIT,
-        });
+          status: run ? STATUS.RUNNING : STATUS.PAUSED // Prediction: asynchronous state updates are causing the step to bounce on from init to ready, before the stop() process completes. THIS DID NOT WORK
+        }
+        update(proposedUpdate);
       }
     }
 
@@ -142,9 +149,10 @@ class Joyride extends React.Component<Props, State> {
       });
     }
 
+    // 'index' is part of the this.state already: should be stepIndex, to pass the changed step?
     const callbackData = {
       ...this.state,
-      index,
+      index: stepIndex ?? index,
       step,
     };
     const isAfterAction = changed('action', [
@@ -201,8 +209,16 @@ class Joyride extends React.Component<Props, State> {
 
     this.scrollToStep(previousState);
 
-    if (step.placement === 'center' && status === STATUS.RUNNING && lifecycle === LIFECYCLE.INIT) {
-      this.store.update({ lifecycle: LIFECYCLE.READY });
+    // TODO: This needs to automatically push to ready for the first step, but not when step:after
+    if (
+      (step.placement === 'center' &&
+      status === STATUS.RUNNING && lifecycle === LIFECYCLE.INIT)
+      || (!isAfterAction &&
+      status === STATUS.RUNNING && lifecycle === LIFECYCLE.INIT)
+    ) {
+      this.store.update({ lifecycle: LIFECYCLE.READY, action }); // Old version: retain the action state
+      // this.store.update({ lifecycle: LIFECYCLE.READY, action: ACTIONS.UPDATE }); // Prediction: this will PASS the last test, but may FAIL others! May need to distinguish edge cases. FALSE and TRUE.
+      // this.store.update({ lifecycle: LIFECYCLE.READY, action: action === ACTIONS.NEXT ? ACTIONS.UPDATE : action }); // Prediction: this will PASS the last test. TRUE. However it fails the test for rendering the Step 2 Tooltip.
     }
   }
 
@@ -219,7 +235,6 @@ class Joyride extends React.Component<Props, State> {
    */
   callback = (data: CallBackProps) => {
     const { callback } = this.props;
-
     if (is.function(callback)) {
       callback(data);
     }
@@ -295,20 +310,25 @@ class Joyride extends React.Component<Props, State> {
         debug,
       });
 
-      const beaconPopper = this.store.getPopper('beacon');
-      const tooltipPopper = this.store.getPopper('tooltip');
+      const beaconPopper: PopperInstance | null = this.store.getPopper('beacon');
+      const tooltipPopper: PopperInstance | null = this.store.getPopper('tooltip');
 
       if (lifecycle === LIFECYCLE.BEACON && beaconPopper) {
-        const { offsets, placement } = beaconPopper;
+        const { placement } = beaconPopper.state;
+
+        const { offset } = beaconPopper.state.modifiersData;
 
         if (!['bottom'].includes(placement) && !hasCustomScroll) {
-          scrollY = Math.floor(offsets.popper.top - scrollOffset);
+          scrollY = Math.floor((offset?.top?.y || 0) - scrollOffset);
         }
       } else if (lifecycle === LIFECYCLE.TOOLTIP && tooltipPopper) {
-        const { flipped, offsets, placement } = tooltipPopper;
+        const {
+          modifiersData: { offset },
+          placement,
+        } = tooltipPopper.state;
 
-        if (['top', 'right', 'left'].includes(placement) && !flipped && !hasCustomScroll) {
-          scrollY = Math.floor(offsets.popper.top - scrollOffset);
+        if (['top', 'right', 'left'].includes(placement) && !hasCustomScroll) {
+          scrollY = Math.floor((offset?.top?.y || 0) - scrollOffset);
         } else {
           scrollY -= step.spotlightPadding;
         }
@@ -320,7 +340,7 @@ class Joyride extends React.Component<Props, State> {
         scrollTo(scrollY, { element: scrollParent as Element, duration: scrollDuration }).then(
           () => {
             setTimeout(() => {
-              this.store.getPopper('tooltip')?.instance.update();
+              this.store.getPopper('tooltip')?.update();
             }, 10);
           },
         );

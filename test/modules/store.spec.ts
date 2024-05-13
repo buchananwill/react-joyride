@@ -1,4 +1,6 @@
+import { PopperInstance } from 'react-floater';
 import { fromPartial } from '@total-typescript/shoehorn';
+import { PartialDeep } from 'type-fest';
 
 import createStore from '~/modules/store';
 
@@ -234,7 +236,7 @@ describe('store', () => {
 
   describe('with popper', () => {
     const store = createStore();
-    const popperData = { placement: 'top' } as const;
+    const popperData: PartialDeep<PopperInstance> = { state: { placement: 'top' } } as const;
 
     it('should set/get both poppers', () => {
       store.setPopper('beacon', fromPartial(popperData));

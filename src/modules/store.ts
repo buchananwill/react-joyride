@@ -3,7 +3,7 @@ import is from 'is-lite';
 
 import { ACTIONS, LIFECYCLE, STATUS } from '~/literals';
 
-import { Origin, State, Status, Step, StoreHelpers, StoreOptions } from '~/types';
+import {Lifecycle, Origin, State, Status, Step, StoreHelpers, StoreOptions} from '~/types';
 
 import { hasValidKeys, objectKeys, omit } from './helpers';
 
@@ -212,13 +212,18 @@ class Store {
   public info = (): State => this.getState();
 
   public next = () => {
-    const { index, status } = this.getState();
+    const { index, status, controlled } = this.getState();
 
     if (status !== STATUS.RUNNING) {
       return;
     }
 
-    this.setState(this.getNextState({ action: ACTIONS.NEXT, index: index + 1 }));
+    // Prediction: telling the lifecycle to pass to complete when hitting next, will prevent it bouncing on to the next index. TRUE.
+    // But it also stops it proceeding automatically in an uncontrolled tour.
+    const lifecycle: Lifecycle | undefined = controlled ? LIFECYCLE.COMPLETE : undefined // Prediction: only setting this property during controlled tours allows the others to proceed normally. TRUE
+    let nextState = this.getNextState({ action: ACTIONS.NEXT, index: index + 1, lifecycle });
+
+    this.setState(this.getNextState(nextState));
   };
 
   public open = () => {
@@ -301,6 +306,7 @@ class Store {
   };
 
   public update = (state: Partial<State>) => {
+
     if (!hasValidKeys(state, validKeys)) {
       throw new Error(`State is not valid. Valid keys: ${validKeys.join(', ')}`);
     }

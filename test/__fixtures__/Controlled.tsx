@@ -1,10 +1,11 @@
 import { useEffect, useReducer, useRef } from 'react';
 
+import { CallBackProps, Props, Step } from '~/types';
+
 import Beacon from './Beacon';
 import Tooltip from './Tooltip';
 
 import Joyride, { ACTIONS, EVENTS, STATUS } from '../../src';
-import { CallBackProps, Props, Step } from '../../src/types';
 
 interface ControlledProps extends Omit<Props, 'run' | 'steps'> {}
 
@@ -128,6 +129,9 @@ export default function Controlled(props: ControlledProps) {
     }, 1000);
   }, []);
 
+  /**
+   * Instance callback created to handle uniquely the lifecycle of this Controlled tour.
+   * */
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { action, index, status, type } = data;
 

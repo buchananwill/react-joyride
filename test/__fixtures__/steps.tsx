@@ -1,11 +1,13 @@
 import { Step } from '~/types';
 
 export const standardSteps: Array<Step> = [
+  // Step 1, index 0
   {
     target: '.projects h2 span',
     placement: 'bottom',
     content: 'The first step of many! Keep walking!',
   },
+  // Step 2, index 1
   {
     target: '.mission button',
     placement: 'bottom',
@@ -13,6 +15,7 @@ export const standardSteps: Array<Step> = [
     title: 'Our Mission',
     spotlightClicks: true,
   },
+  // Step 3, index 2
   {
     target: '.about h2 span',
     placement: 'left',
@@ -37,16 +40,19 @@ export const standardSteps: Array<Step> = [
       </div>
     ),
   },
+  // Step 4, index 3
   {
     target: '.not-mounted',
     content: 'This step tests what happens when a target is missing',
     title: 'Unmounted target',
   },
+  // Step 5, index 4
   {
     target: '.demo__footer button',
     placement: 'top',
     content: "Text only steps — Because sometimes you don't really need a proper heading",
   },
+  // Step 6, index 5
   {
     target: 'body',
     placement: 'center',

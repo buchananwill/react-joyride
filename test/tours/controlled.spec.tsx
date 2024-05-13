@@ -203,7 +203,7 @@ describe('Joyride > Controlled', () => {
   it('should be able to click STEP 3 Primary button', () => {
     fireEvent.click(screen.getByTestId('button-primary'));
 
-    expect(mockCallback).toHaveBeenCalledTimes(14);
+    expect(mockCallback).toHaveBeenCalledTimes(16);
 
     expect(mockCallback).toHaveBeenNthCalledWith(
       14,
@@ -249,7 +249,7 @@ describe('Joyride > Controlled', () => {
   it('should be able to click STEP 4 Back button', () => {
     fireEvent.click(screen.getByTestId('button-back'));
 
-    expect(mockCallback).toHaveBeenCalledTimes(17);
+    expect(mockCallback).toHaveBeenCalledTimes(19);
 
     expect(mockCallback).toHaveBeenNthCalledWith(
       17,
@@ -295,7 +295,7 @@ describe('Joyride > Controlled', () => {
   it('should be able to click STEP 3 Primary button AGAIN', () => {
     fireEvent.click(screen.getByTestId('button-primary'));
 
-    expect(mockCallback).toHaveBeenCalledTimes(20);
+    expect(mockCallback).toHaveBeenCalledTimes(22);
 
     expect(mockCallback).toHaveBeenNthCalledWith(
       20,
@@ -341,7 +341,7 @@ describe('Joyride > Controlled', () => {
   it('should be able to click STEP 4 Primary button', () => {
     fireEvent.click(screen.getByTestId('button-primary'));
 
-    expect(mockCallback).toHaveBeenCalledTimes(23);
+    expect(mockCallback).toHaveBeenCalledTimes(25);
 
     expect(mockCallback).toHaveBeenNthCalledWith(
       23,
@@ -387,7 +387,7 @@ describe('Joyride > Controlled', () => {
   it('should be able to click STEP 5 Primary button', () => {
     fireEvent.click(screen.getByTestId('button-primary'));
 
-    expect(mockCallback).toHaveBeenCalledTimes(26);
+    expect(mockCallback).toHaveBeenCalledTimes(28);
 
     expect(mockCallback).toHaveBeenNthCalledWith(
       26,

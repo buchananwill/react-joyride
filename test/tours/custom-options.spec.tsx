@@ -35,6 +35,8 @@ describe('Joyride > Custom Options', () => {
   });
 
   it('should start the tour', async () => {
+    const byTestId = screen.getByTestId('start');
+
     fireEvent.click(screen.getByTestId('start'));
 
     await waitFor(() => {
@@ -61,7 +63,7 @@ describe('Joyride > Custom Options', () => {
   it('should handle clicking the STEP 1 Primary button', () => {
     fireEvent.click(screen.getByTestId('button-primary'));
 
-    expect(mockCallback).toHaveBeenCalledTimes(5);
+    expect(mockCallback).toHaveBeenCalledTimes(7);
   });
 
   it('should render the STEP 2 Tooltip', async () => {
@@ -76,7 +78,7 @@ describe('Joyride > Custom Options', () => {
   it('should close the STEP 2 Tooltip by clicking the overlay', async () => {
     fireEvent.click(screen.getByTestId('overlay'));
 
-    expect(mockCallback).toHaveBeenCalledTimes(8);
+    expect(mockCallback).toHaveBeenCalledTimes(10);
   });
 
   it('should render the STEP 3 Beacon', async () => {
@@ -100,7 +102,7 @@ describe('Joyride > Custom Options', () => {
   it('should handle clicking the STEP 3 Close button', () => {
     fireEvent.click(screen.getByTestId('button-close'));
 
-    expect(mockCallback).toHaveBeenCalledTimes(12);
+    expect(mockCallback).toHaveBeenCalledTimes(14);
   });
 
   it('should render the STEP 4 Beacon', async () => {

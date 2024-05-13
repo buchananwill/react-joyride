@@ -1,16 +1,16 @@
 import * as React from 'react';
-import Floater, { Props as FloaterProps, RenderProps } from 'react-floater';
+import Floater, {CustomComponentProps, Props as FloaterProps} from 'react-floater';
 import is from 'is-lite';
 import treeChanges from 'tree-changes';
 
-import { getElement, isElementVisible } from '~/modules/dom';
-import { hideBeacon, log } from '~/modules/helpers';
+import {getElement, isElementVisible} from '~/modules/dom';
+import {hideBeacon, log} from '~/modules/helpers';
 import Scope from '~/modules/scope';
-import { validateStep } from '~/modules/step';
+import {validateStep} from '~/modules/step';
 
-import { ACTIONS, EVENTS, LIFECYCLE, STATUS } from '~/literals';
+import {ACTIONS, EVENTS, LIFECYCLE, STATUS} from '~/literals';
 
-import { StepProps } from '~/types';
+import {Status, StepProps} from '~/types';
 
 import Beacon from './Beacon';
 import Tooltip from './Tooltip/index';
@@ -48,7 +48,7 @@ export default class JoyrideStep extends React.Component<StepProps> {
 
     const skipBeacon =
       continuous && action !== ACTIONS.CLOSE && (index > 0 || action === ACTIONS.PREV);
-    const hasStoreChanged =
+    const storeHasChanged =
       changed('action') || changed('index') || changed('lifecycle') || changed('status');
     const isInitial = changedFrom('lifecycle', [LIFECYCLE.TOOLTIP, LIFECYCLE.INIT], LIFECYCLE.INIT);
     const isAfterAction = changed('action', [
@@ -69,17 +69,22 @@ export default class JoyrideStep extends React.Component<StepProps> {
       });
     }
 
+    // Prediction: commenting this entire conditional will block the controlled tour. TRUE
     if (
-      step.placement === 'center' &&
+      step.placement === 'center' && // prediction: uncommenting prevents the auto-ready needed to start the controlled tour FALSE
       status === STATUS.RUNNING &&
+      lifecycle === LIFECYCLE.INIT &&
       changed('index') &&
-      action !== ACTIONS.START &&
-      lifecycle === LIFECYCLE.INIT
+      action !== ACTIONS.START
+      // && !controlled // prediction: adding this will block the controlled tour TRUE
     ) {
-      store.update({ lifecycle: LIFECYCLE.READY });
+      store.update({
+        lifecycle: LIFECYCLE.READY,
+        action: ACTIONS.UPDATE  // I added this action persistence, to try to pass the controlled/custom tours. Prediction: setting manually to UPDATE will satisfy the Step 6 Standard test FALSE.
+      });
     }
 
-    if (hasStoreChanged) {
+    if (storeHasChanged) {
       const element = getElement(step.target);
       const elementExists = !!element;
       const hasRenderedTarget = elementExists && isElementVisible(element);
@@ -105,7 +110,7 @@ export default class JoyrideStep extends React.Component<StepProps> {
         });
 
         if (!controlled) {
-          store.update({ index: index + (action === ACTIONS.PREV ? -1 : 1) });
+          store.update({ index: index + (action === ACTIONS.PREV ? -1 : 1), action: ACTIONS.UPDATE }); // Using action update instead of next, when a step is skipped (to satisfy the test expectations).
         }
       }
     }
@@ -173,20 +178,20 @@ export default class JoyrideStep extends React.Component<StepProps> {
   };
 
   setPopper: FloaterProps['getPopper'] = (popper, type) => {
-    const { action, lifecycle, step, store } = this.props;
-
+    const {step, store } = this.props;
     if (type === 'wrapper') {
       store.setPopper('beacon', popper);
     } else {
       store.setPopper('tooltip', popper);
     }
 
-    if (store.getPopper('beacon') && store.getPopper('tooltip') && lifecycle === LIFECYCLE.INIT) {
-      store.update({
-        action,
-        lifecycle: LIFECYCLE.READY,
-      });
-    }
+    // Prediction: commenting this condition will block the controlled tour. FALSE.
+    // if (store.getPopper('beacon') && store.getPopper('tooltip') && lifecycle === LIFECYCLE.INIT) {
+    //   store.update({
+    //     action,
+    //     lifecycle: LIFECYCLE.READY,
+    //   });
+    // }
 
     if (step.floaterProps?.getPopper) {
       step.floaterProps.getPopper(popper, type);
@@ -195,11 +200,14 @@ export default class JoyrideStep extends React.Component<StepProps> {
 
   get open() {
     const { lifecycle, step } = this.props;
-
-    return hideBeacon(step) || lifecycle === LIFECYCLE.TOOLTIP;
+    return (hideBeacon(step) || lifecycle === LIFECYCLE.TOOLTIP)
+      && ([STATUS.RUNNING, STATUS.READY] as Array<Status>).includes(this.props.status)
+      && lifecycle !== LIFECYCLE.INIT
   }
 
-  renderTooltip = (renderProps: RenderProps) => {
+
+
+  renderTooltip = (renderProps: CustomComponentProps) => {
     const { continuous, helpers, index, size, step } = this.props;
 
     return (
@@ -224,10 +232,12 @@ export default class JoyrideStep extends React.Component<StepProps> {
       return null;
     }
 
+    const { component, content, ...otherProps } = step.floaterProps || {};
+
     return (
       <div key={`JoyrideStep-${index}`} className="react-joyride__step">
         <Floater
-          {...step.floaterProps}
+          {...otherProps}
           component={this.renderTooltip}
           debug={debug}
           getPopper={this.setPopper}
@@ -236,6 +246,7 @@ export default class JoyrideStep extends React.Component<StepProps> {
           placement={step.placement}
           target={step.target}
         >
+          {!this.open &&
           <Beacon
             beaconComponent={step.beaconComponent}
             continuous={continuous}
@@ -249,6 +260,7 @@ export default class JoyrideStep extends React.Component<StepProps> {
             step={step}
             styles={step.styles}
           />
+          }
         </Floater>
       </div>
     );

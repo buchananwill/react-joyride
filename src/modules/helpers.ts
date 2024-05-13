@@ -120,7 +120,7 @@ export function hexToRGB(hex: string): Array<number> {
 }
 
 /**
- * Decide if the step shouldn't skip the beacon
+ * Decide if the step should skip the beacon
  * @param {Object} step
  *
  * @returns {boolean}
